@@ -1,0 +1,6 @@
+---
+tomcat_version: "9.0.21"
+tomcat_home: "/opt/tomcat"
+java_package: "openjdk-11-jdk"
+tomcat_user: "tomcat"
+tomcat_group: "tomcat"
