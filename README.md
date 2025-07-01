@@ -116,5 +116,5 @@ tomcat_group: "tomcat"
 
 ## 📬 Author
 
-Made by **Vinny Markwa**  
-GitHub: [@vinnymarkwa](https://github.com/vinnymarkwa)
+Made by **Markwa**  
+GitHub: [@markwa2000](https://github.com/markwa2000)
