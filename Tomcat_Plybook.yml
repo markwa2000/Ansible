@@ -1,0 +1,99 @@
+---
+- name: Deploy Apache Tomcat on Remote Server
+  hosts: all
+  become: true
+  vars:
+    tomcat_version: "9.0.21"
+    tomcat_home: "/opt/tomcat"
+    # tomcat_user: "tomcat"
+    # tomcat_group: "tomcat"
+    java_package: "openjdk-11-jdk"  # Change based on your requirement
+
+  tasks:
+    - name: Install Java
+      apt:
+        name: "{{ java_package }}"
+        state: present
+        update_cache: yes
+
+    # - name: Create Tomcat group
+    #   group:
+    #     name: "{{ tomcat_group }}"
+    #     state: present
+
+    # - name: Create Tomcat user
+    #   user:
+    #     name: "{{ tomcat_user }}"
+    #     group: "{{ tomcat_group }}"
+    #     home: "{{ tomcat_home }}"
+    #     shell: /bin/false
+    #     state: present
+
+    - name: Download Apache Tomcat
+      get_url:
+        url: "https://archive.apache.org/dist/tomcat/tomcat-9/v{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
+        dest: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
+
+    - name: Create Tomcat directory
+      file:
+        path: "{{ tomcat_home }}"
+        state: directory
+        # owner: "{{ tomcat_user }}"
+        # group: "{{ tomcat_group }}"
+        # mode: '0755'
+
+    - name: Extract Tomcat
+      ansible.builtin.unarchive:
+        src: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
+        dest: "{{ tomcat_home }}"
+        remote_src: yes
+        extra_opts: [--strip-components=1]
+        # owner: "{{ tomcat_user }}"
+        # group: "{{ tomcat_group }}"
+
+    - name: Set execute permissions for Tomcat scripts
+      file:
+        path: "{{ tomcat_home }}/bin"
+        state: directory
+        recurse: yes
+        mode: '0755'
+
+    - name: start tomcat
+      shell: "/opt/tomcat/bin/startup.sh"
+      args: 
+        chdir: "/opt/tomcat/bin"
+
+    - name: Install webapps from web
+      get_url:
+        url: "https://www.oracle.com/webfolder/technetwork/tutorials/obe/fmw/wls/10g/r3/cluster/session_state/files/shoppingcart.zip"
+        dest: "/tmp/shoppingcart.zip"
+
+    - name: install Unzip
+      apt:
+        name: unzip
+        state: present 
+    
+    - name: unzip
+      ansible.builtin.unarchive:
+        src: "/tmp/shoppingcart.zip"
+        dest: "/opt/tomcat/webapps/"
+        
+
+    # - name: Install webapps
+    #   copy:
+    #     src: "tomcat/roles/tomcat/files/index.html"
+    #     dest: "/opt/tomcat/webapps/"
+    
+    # - name: Create Tomcat service file
+    #   copy:
+    #     dest: "/etc/systemd/system/tomcat.service"
+    #     content: |
+    #       [Unit]
+    #       Description=Apache Tomcat
+    #       After=network.target
+
+    #       [Service]
+    #       Type=forking
+    #       User={{ tomcat_user }}
+    #       Group={{ tomcat_group }}
+    #       Environment="JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64"
