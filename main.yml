@@ -2,6 +2,7 @@
 - hosts: all
   become: true
   roles:
-    - myrole
+    - nginx
     - tomcat
+    - ec2_role
 
